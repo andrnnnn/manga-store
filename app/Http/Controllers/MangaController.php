@@ -12,7 +12,8 @@ class MangaController extends Controller
     public function index()
     {
         $mangas = Manga::with('categories')->get();
-        return view('admin.manga.index', compact('mangas'));
+        $categories = Category::all();
+        return view('admin.manga.index', compact('mangas', 'categories'));
     }
 
     public function createForm()
@@ -96,7 +97,7 @@ class MangaController extends Controller
                         unlink($oldCoverPath);
                     }
                 }
-                
+
                 $coverName = $request->title . '-' . time() . '.' . $request->cover->extension();
                 $coverName = str_replace(['#', '/', '\\', ' '], '-', strtolower($coverName));
                 $request->cover->move(public_path('images/covers'), $coverName);
@@ -136,7 +137,7 @@ class MangaController extends Controller
 
             $manga->delete(); // Soft delete manga
             return redirect()->route('manga.index')->with('success', 'Manga berhasil dihapus!');
-            
+
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
