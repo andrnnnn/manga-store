@@ -13,11 +13,28 @@ class MangaSeeder extends Seeder
         // Buat kategori terlebih dahulu
         $categories = [
             ['name' => 'Action'],
-            ['name' => 'Adventure'],
+            ['name' => 'Adventure'], 
             ['name' => 'Comedy'],
             ['name' => 'Drama'],
             ['name' => 'Fantasy'],
             ['name' => 'Romance'],
+            ['name' => 'Horror'],
+            ['name' => 'Mystery'],
+            ['name' => 'Psychological'],
+            ['name' => 'Sci-Fi'],
+            ['name' => 'Slice of Life'],
+            ['name' => 'Sports'],
+            ['name' => 'Supernatural'],
+            ['name' => 'Thriller'],
+            ['name' => 'School Life'],
+            ['name' => 'Martial Arts'],
+            ['name' => 'Mecha'],
+            ['name' => 'Historical'],
+            ['name' => 'Isekai'],
+            ['name' => 'Shounen'],
+            ['name' => 'Shoujo'],
+            ['name' => 'Seinen'],
+            ['name' => 'Josei'],
         ];
 
         foreach ($categories as $category) {
