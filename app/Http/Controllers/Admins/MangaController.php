@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Controller;
 use App\Models\Manga;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class MangaController extends Controller
 
             $manga->categories()->attach($request->categories);
 
-            return redirect()->route('manga.index')->with('success', 'Manga berhasil ditambahkan!');
+            return redirect()->route('admin.manga.index')->with('success', 'Manga berhasil ditambahkan!');
 
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])->withInput();
@@ -117,7 +118,7 @@ class MangaController extends Controller
             // Sync categories
             $manga->categories()->sync($request->categories);
 
-            return redirect()->route('manga.index')->with('success', 'Manga berhasil diperbarui!');
+            return redirect()->route('admin.manga.index')->with('success', 'Manga berhasil diperbarui!');
 
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])->withInput();
@@ -136,7 +137,7 @@ class MangaController extends Controller
             }
 
             $manga->delete(); // Soft delete manga
-            return redirect()->route('manga.index')->with('success', 'Manga berhasil dihapus!');
+            return redirect()->route('admin.manga.index')->with('success', 'Manga berhasil dihapus!');
 
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);

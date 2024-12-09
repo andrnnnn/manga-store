@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Manga;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -11,6 +13,15 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Hitung total users (exclude admin)
+        $totalUsers = User::where('role', '!=', 'admin')->count();
+        $lastMonthUsers = User::where('role', '!=', 'admin')
+            ->where('created_at', '<', Carbon::now()->startOfMonth())
+            ->count();
+        $userGrowth = $lastMonthUsers > 0 
+            ? round((($totalUsers - $lastMonthUsers) / $lastMonthUsers) * 100, 1)
+            : 0;
+
         // Hitung total manga
         $totalManga = Manga::count();
 
@@ -43,6 +54,8 @@ class DashboardController extends Controller
             ->get();
 
         return view('admin.dashboard', compact(
+            'totalUsers',
+            'userGrowth',
             'totalManga',
             'mangaGrowth',
             'totalOrders',
