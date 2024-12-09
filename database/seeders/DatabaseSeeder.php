@@ -11,7 +11,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             UserSeeder::class,
-            MangaSeeder::class
+            MangaSeeder::class,
+            OrderSeeder::class,
+            CartSeeder::class
         ]);
     }
 }
