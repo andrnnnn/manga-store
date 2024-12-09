@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id('order_id');
+        Schema::create('cart_items', function (Blueprint $table) {
+            $table->id('cart_item_id');
             $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
-            $table->decimal('total_price', 10, 2);
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
-            $table->string('invoice_number', 50)->unique()->nullable();
+            $table->foreignId('manga_id')->constrained('mangas', 'manga_id')->onDelete('cascade');
+            $table->integer('quantity')->default(1);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('cart_items');
     }
-};
+}; 
