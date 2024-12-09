@@ -3,13 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Manga;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WelcomeController extends Controller
 {
     public function index()
     {
-        $featuredMangas = Manga::inRandomOrder()->limit(8)->get();
+        if (Auth::check()) {
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('user.dashboard');
+        }
+        
+        $featuredMangas = Manga::inRandomOrder()->limit(6)->get();
         return view('welcome', compact('featuredMangas'));
     }
 }
