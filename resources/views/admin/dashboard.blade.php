@@ -6,6 +6,24 @@
     <title>Dashboard Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body class="bg-gray-900 min-h-screen font-[Poppins] text-gray-100">
     <!-- Sidebar -->
@@ -25,7 +43,7 @@
                 Dashboard
             </a>
 
-            <a href="{{ route('manga.index') }}" 
+            <a href="{{ route('admin.manga.index') }}" 
                 class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -34,7 +52,7 @@
                 Manga
             </a>
 
-            <a href="{{ route('orders.index') }}" 
+            <a href="{{ route('admin.orders.index') }}" 
                 class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -55,10 +73,7 @@
             </div>
             <div class="flex items-center gap-4">
                 <span>{{ auth()->user()->name }}</span>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-gray-400 hover:text-white">Logout</button>
-                </form>
+                <button onclick="showLogoutModal()" class="text-gray-400 hover:text-white">Logout</button>
             </div>
         </div>
 
@@ -83,6 +98,31 @@
                 </div>
             </div>
 
+            <div class="bg-gray-800 p-6 rounded-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total User</p>
+                        <h3 class="text-2xl font-bold">{{ $totalUsers }}</h3>
+                    </div>
+                    <div class="p-2 bg-primary/20 text-primary rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    @if($userGrowth > 0)
+                        <span class="text-green-400">↑ {{ $userGrowth }}%</span>
+                    @elseif($userGrowth < 0)
+                        <span class="text-red-400">↓ {{ abs($userGrowth) }}%</span>
+                    @else
+                        <span class="text-gray-400">0%</span>
+                    @endif
+                    <span class="text-gray-400 ml-2">dari bulan lalu</span>
+                </div>
+            </div>
+
             <!-- Similar stats cards for Orders and Revenue -->
         </div>
 
@@ -90,7 +130,7 @@
         <div class="bg-gray-800 rounded-xl p-6">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-lg font-semibold">Pesanan Terbaru</h2>
-                <a href="{{ route('orders.index') }}" class="text-primary hover:text-primary-dark">
+                <a href="{{ route('admin.orders.index') }}" class="text-primary hover:text-primary-dark">
                     Lihat Semua
                 </a>
             </div>
@@ -130,5 +170,36 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Konfirmasi Logout -->
+    <div id="logoutModal" class="modal">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-semibold mb-4">Konfirmasi Logout</h3>
+            <p class="text-gray-300 mb-6">Apakah Anda yakin ingin keluar?</p>
+            <div class="flex justify-end gap-4">
+                <button onclick="hideLogoutModal()" 
+                    class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors">
+                    Batal
+                </button>
+                <form action="{{ route('logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" 
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+                        Ya, Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogoutModal() {
+            document.getElementById('logoutModal').classList.add('show');
+        }
+
+        function hideLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('show');
+        }
+    </script>
 </body>
 </html>

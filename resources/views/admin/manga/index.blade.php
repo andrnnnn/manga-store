@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Manga - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .loading {
@@ -43,6 +44,77 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Custom scrollbar styles */
+        .category-list {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #4B5563 #1F2937;
+        }
+
+        .category-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .category-list::-webkit-scrollbar-track {
+            background: #1F2937;
+            border-radius: 4px;
+        }
+
+        .category-list::-webkit-scrollbar-thumb {
+            background: #4B5563;
+            border-radius: 4px;
+        }
+
+        .category-list::-webkit-scrollbar-thumb:hover {
+            background: #6B7280;
+        }
+
+        /* DataTables Custom Styling */
+        .dataTables_wrapper {
+            padding: 1rem;
+            color: #E5E7EB;
+        }
+
+        .dataTables_filter input,
+        .dataTables_length select {
+            background: #374151;
+            border: 1px solid #4B5563;
+            color: #E5E7EB;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            margin-left: 0.5rem;
+        }
+
+        .dataTables_filter input:focus,
+        .dataTables_length select:focus {
+            outline: none;
+            border-color: #6366F1;
+        }
+
+        .dataTables_info,
+        .dataTables_paginate {
+            margin-top: 1rem;
+        }
+
+        .dataTables_paginate .paginate_button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 0.375rem;
+            background: #374151;
+            color: #E5E7EB !important;
+        }
+
+        .dataTables_paginate .paginate_button:hover {
+            background: #4B5563 !important;
+            color: white !important;
+        }
+
+        .dataTables_paginate .paginate_button.current {
+            background: #6366F1 !important;
+            color: white !important;
+        }
     </style>
 </head>
 <body class="bg-gray-900 min-h-screen font-[Poppins] text-gray-100">
@@ -58,7 +130,7 @@
                 <h1 class="text-2xl font-bold">Daftar Manga</h1>
                 <p class="text-gray-400">Kelola koleksi manga toko</p>
             </div>
-            <a href="{{ route('manga.create') }}"
+            <a href="{{ route('admin.manga.create.form') }}"
                 class="add-btn flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                 onclick="handleButtonClick(this)">
                 <svg class="spinner w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,14 +154,20 @@
         </div>
 
         @if(session('success'))
-            <div class="bg-green-400/20 text-green-400 px-4 py-3 rounded-lg mb-6">
+            <div class="mb-4 p-4 bg-green-500/20 text-green-500 rounded-lg">
                 {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-4 p-4 bg-red-500/20 text-red-500 rounded-lg">
+                {{ session('error') }}
             </div>
         @endif
 
         <div class="bg-gray-800 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table id="mangaTable" class="w-full">
                     <thead>
                         <tr class="text-left text-gray-400 text-sm border-b border-gray-700">
                             <th class="px-6 py-4">Cover</th>
@@ -104,7 +182,6 @@
                     <tbody class="divide-y divide-gray-700">
                         @foreach($mangas as $manga)
                             <tr class="hover:bg-gray-700/50">
-
                                 <td class="px-6 py-4">
                                     <img src="{{ asset($manga->cover_url) }}" alt="Cover {{ $manga->title }}" class="w-16 h-20 object-cover rounded">
                                 </td>
@@ -139,7 +216,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
-                                        <a href="{{ route('manga.update.form', $manga) }}"
+                                        <a href="{{ route('admin.manga.update.form', $manga) }}"
                                             class="edit-btn p-2 text-blue-400 hover:bg-blue-400/20 rounded-lg transition-colors"
                                             onclick="handleButtonClick(this)">
                                             <svg class="spinner w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +226,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
                                         </a>
-                                        <form id="deleteForm{{ $manga->manga_id }}" action="{{ route('manga.destroy', $manga) }}" method="POST" class="inline">
+                                        <form id="deleteForm{{ $manga->manga_id }}" action="{{ route('admin.manga.destroy', $manga) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button"
@@ -206,7 +283,7 @@
             </div>
 
             <!-- Form Tambah Kategori -->
-            <form action="{{ route('category.create') }}" method="POST" class="mb-6" id="categoryForm">
+            <form action="{{ route('admin.categories.create') }}" method="POST" class="mb-6" id="categoryForm">
                 @csrf
                 <div class="flex gap-2">
                     <input type="text" name="name" placeholder="Nama kategori baru"
@@ -221,7 +298,7 @@
             <!-- Daftar Kategori -->
             <div class="space-y-3">
                 <h4 class="text-sm font-medium text-gray-400">Daftar Kategori</h4>
-                <div class="space-y-2">
+                <div class="category-list space-y-2">
                     @if(session('category_error'))
                         <div class="mb-4 p-4 bg-red-400/20 text-red-400 rounded-lg">
                             {{ session('category_error') }}
@@ -237,7 +314,7 @@
                     @foreach($categories as $category)
                         <div class="flex items-center justify-between py-2 px-3 bg-gray-700/50 rounded-lg">
                             <span>{{ $category->name }}</span>
-                            <form action="{{ route('category.destroy', $category) }}" method="POST" class="inline">
+                            <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button"
@@ -285,10 +362,34 @@
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script>
         let currentMangaId = null;
         let currentCategoryId = null;
         let currentCategoryForm = null;
+
+        $(document).ready(function() {
+            $('#mangaTable').DataTable({
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    infoFiltered: "(disaring dari _MAX_ total data)",
+                    zeroRecords: "Tidak ada data yang cocok",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                },
+                pageLength: 10,
+                ordering: true,
+                responsive: true
+            });
+        });
 
         function handleButtonClick(button) {
             button.classList.add('loading');
