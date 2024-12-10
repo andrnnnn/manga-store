@@ -18,16 +18,25 @@ class CategoryController extends Controller
         ]);
 
         Category::create($request->only('name'));
-        return back()->with('category_success', 'Kategori berhasil ditambahkan!');
+        return redirect()->route('admin.manga.index')->with('success', 'Kategori berhasil ditambahkan!');
     }
 
     public function destroy(Category $category)
     {
-        if ($category->mangas()->count() > 0) {
-            return back()->with('category_error', 'Kategori tidak dapat dihapus karena masih digunakan oleh manga');
-        }
+        try {
+            if ($category->mangas()->count() > 0) {
+                return redirect()->route('admin.manga.index')->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh manga');
+            }
 
-        $category->delete();
-        return back()->with('category_success', 'Kategori berhasil dihapus!');
+            // Hapus relasi manga_category terlebih dahulu jika ada
+            $category->mangas()->detach();
+            
+            // Hapus kategori secara permanen
+            $category->forceDelete();
+
+            return redirect()->route('admin.manga.index')->with('success', 'Kategori berhasil dihapus!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.manga.index')->with('error', 'Gagal menghapus kategori: ' . $e->getMessage());
+        }
     }
 }

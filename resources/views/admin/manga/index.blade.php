@@ -153,18 +153,6 @@
             </button>
         </div>
 
-        @if(session('success'))
-            <div class="mb-4 p-4 bg-green-500/20 text-green-500 rounded-lg">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-4 p-4 bg-red-500/20 text-red-500 rounded-lg">
-                {{ session('error') }}
-            </div>
-        @endif
-
         <div class="bg-gray-800 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table id="mangaTable" class="w-full">
@@ -299,18 +287,6 @@
             <div class="space-y-3">
                 <h4 class="text-sm font-medium text-gray-400">Daftar Kategori</h4>
                 <div class="category-list space-y-2">
-                    @if(session('category_error'))
-                        <div class="mb-4 p-4 bg-red-400/20 text-red-400 rounded-lg">
-                            {{ session('category_error') }}
-                        </div>
-                    @endif
-
-                    @if(session('category_success'))
-                        <div class="mb-4 p-4 bg-green-400/20 text-green-400 rounded-lg">
-                            {{ session('category_success') }}
-                        </div>
-                    @endif
-
                     @foreach($categories as $category)
                         <div class="flex items-center justify-between py-2 px-3 bg-gray-700/50 rounded-lg">
                             <span>{{ $category->name }}</span>
@@ -333,16 +309,6 @@
         </div>
     </div>
 
-    <!-- Pop up Pesan Kategori -->
-    <div id="categoryMessagePopup" class="fixed top-4 right-4 z-50 transition-transform duration-300 transform translate-x-full">
-        <div class="p-4 rounded-lg shadow-lg bg-gray-800 border border-gray-700">
-            <div id="categoryErrorMessage" class="hidden p-4 bg-red-500 text-white rounded-lg font-medium">
-            </div>
-            <div id="categorySuccessMessage" class="hidden p-4 bg-green-500 text-white rounded-lg font-medium">
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Konfirmasi Hapus Kategori -->
     <div id="deleteCategoryModal" class="modal">
         <div class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
@@ -358,6 +324,16 @@
                     class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
                     Ya, Hapus
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tambahkan popup message di bagian bawah body sebelum script -->
+    <div id="messagePopup" class="fixed top-4 right-4 z-50 transition-transform duration-300 transform translate-x-full">
+        <div class="p-4 rounded-lg shadow-lg bg-gray-800 border border-gray-700">
+            <div id="errorMessage" class="hidden p-4 bg-red-500 text-white rounded-lg font-medium">
+            </div>
+            <div id="successMessage" class="hidden p-4 bg-green-500 text-white rounded-lg font-medium">
             </div>
         </div>
     </div>
@@ -442,10 +418,10 @@
         }
 
         // Fungsi untuk menampilkan pesan popup
-        function showCategoryMessage(message, type) {
-            const popup = document.getElementById('categoryMessagePopup');
-            const errorDiv = document.getElementById('categoryErrorMessage');
-            const successDiv = document.getElementById('categorySuccessMessage');
+        function showMessage(message, type) {
+            const popup = document.getElementById('messagePopup');
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
 
             if (type === 'error') {
                 errorDiv.textContent = message;
@@ -465,13 +441,13 @@
             }, 3000);
         }
 
-        // Tampilkan pesan jika ada
-        @if(session('category_error'))
-            showCategoryMessage("{{ session('category_error') }}", 'error');
+        // Update bagian tampilkan pesan
+        @if(session('success') || session('category_success'))
+            showMessage("{{ session('success') ?? session('category_success') }}", 'success');
         @endif
 
-        @if(session('category_success'))
-            showCategoryMessage("{{ session('category_success') }}", 'success');
+        @if(session('error') || session('category_error'))
+            showMessage("{{ session('error') ?? session('category_error') }}", 'error');
         @endif
     </script>
 </body>
