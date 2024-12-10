@@ -12,15 +12,22 @@ class Manga extends Model
 
     protected $primaryKey = 'manga_id';
 
-    protected $fillable = ['title', 'author', 'price', 'stock', 'cover_url', 'description'];
+    protected $fillable = [
+        'title',
+        'author', 
+        'description',
+        'price',
+        'stock',
+        'cover_url'
+    ];
 
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'category_manga', 'manga_id', 'category_id');
     }
 
-    public function orderItems()
+    public function cartItems() 
     {
-        return $this->hasMany(OrderItem::class, 'manga_id');
+        return $this->hasMany(CartItem::class, 'manga_id');
     }
 }
