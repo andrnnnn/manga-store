@@ -92,10 +92,6 @@
                         </svg>
                     </div>
                 </div>
-                <div class="flex items-center text-sm">
-                    <span class="text-green-400">↑ 12%</span>
-                    <span class="text-gray-400 ml-2">dari bulan lalu</span>
-                </div>
             </div>
 
             <div class="bg-gray-800 p-6 rounded-xl">
@@ -111,62 +107,21 @@
                         </svg>
                     </div>
                 </div>
-                <div class="flex items-center text-sm">
-                    @if($userGrowth > 0)
-                        <span class="text-green-400">↑ {{ $userGrowth }}%</span>
-                    @elseif($userGrowth < 0)
-                        <span class="text-red-400">↓ {{ abs($userGrowth) }}%</span>
-                    @else
-                        <span class="text-gray-400">0%</span>
-                    @endif
-                    <span class="text-gray-400 ml-2">dari bulan lalu</span>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Pendapatan</p>
+                        <h3 class="text-2xl font-bold">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
+                    </div>
+                    <div class="p-2 bg-primary/20 text-primary rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Similar stats cards for Orders and Revenue -->
-        </div>
-
-        <!-- Recent Orders Table -->
-        <div class="bg-gray-800 rounded-xl p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-semibold">Pesanan Terbaru</h2>
-                <a href="{{ route('admin.orders.index') }}" class="text-primary hover:text-primary-dark">
-                    Lihat Semua
-                </a>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="text-left text-gray-400 text-sm">
-                            <th class="pb-4">Order ID</th>
-                            <th class="pb-4">Pelanggan</th>
-                            <th class="pb-4">Total</th>
-                            <th class="pb-4">Status</th>
-                            <th class="pb-4">Tanggal</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-sm">
-                        @foreach($recentOrders as $order)
-                            <tr class="border-t border-gray-700">
-                                <td class="py-4">#{{ $order->order_id }}</td>
-                                <td class="py-4">{{ $order->user->name }}</td>
-                                <td class="py-4">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
-                                <td class="py-4">
-                                    <span @class([
-                                        'px-2 py-1 rounded-full text-xs',
-                                        'bg-green-400/20 text-green-400' => $order->status === 'completed',
-                                        'bg-yellow-400/20 text-yellow-400' => $order->status === 'pending', 
-                                        'bg-red-400/20 text-red-400' => $order->status === 'cancelled'
-                                    ])>
-                                        {{ ucfirst($order->status) }}
-                                    </span>
-                                </td>
-                                <td class="py-4">{{ $order->created_at->format('d M Y') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
