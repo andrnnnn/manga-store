@@ -79,9 +79,9 @@
 
         .dataTables_filter input,
         .dataTables_length select {
-            background: #374151;
-            border: 1px solid #4B5563;
-            color: #E5E7EB;
+            background: #374151 !important;
+            border: 1px solid #4B5563 !important;
+            color: #E5E7EB !important;
             border-radius: 0.375rem;
             padding: 0.5rem;
             margin-left: 0.5rem;
@@ -458,7 +458,7 @@
             }
 
             popup.classList.remove('translate-x-full');
-            
+
             // Sembunyikan popup setelah 3 detik
             setTimeout(() => {
                 popup.classList.add('translate-x-full');
