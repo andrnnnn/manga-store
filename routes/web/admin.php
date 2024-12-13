@@ -23,9 +23,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     });
 
     // Order Management
-    Route::prefix('orders')->name('orders.')->group(function () {
+    Route::prefix('order')->name('order.')->group(function () {
         Route::get('/', [AdminOrderController::class, 'index'])->name('index');
-        Route::get('/pending', [AdminOrderController::class, 'pending'])->name('pending');
         Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
         Route::patch('/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('updateStatus');
     });
