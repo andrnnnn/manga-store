@@ -8,34 +8,52 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['user', 'orderItems.manga'])->latest()->paginate(10);
-        return view('admin.orders.index', compact('orders'));
-    }
+        $query = Order::with(['user', 'orderItems.manga']);
 
-    public function pending()
-    {
-        $orders = Order::with(['user', 'orderItems.manga'])
-            ->where('status', 'pending')
-            ->latest()
-            ->paginate(10);
-        return view('admin.orders.pending', compact('orders'));
+        // Filter berdasarkan status jika ada
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Get data untuk DataTables
+        $orders = $query->latest()->get();
+
+        return view('admin.order.index', compact('orders'));
     }
 
     public function show(Order $order)
     {
         $order->load(['user', 'orderItems.manga']);
-        return view('admin.orders.show', compact('order'));
+        return view('admin.order.show', compact('order'));
     }
 
     public function updateStatus(Request $request, Order $order)
     {
-        $validated = $request->validate([
+        if ($order->status == 'completed' || $order->status == 'cancelled') {
+            return redirect()->back()->with('error', 'Status pesanan yang sudah selesai atau dibatalkan tidak dapat diubah');
+        }
+
+        $request->validate([
             'status' => 'required|in:pending,completed,cancelled'
         ]);
 
-        $order->update($validated);
-        return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui!');
+        if ($order->total_price == 0) {
+            $total = $order->orderItems->sum(function($item) {
+                return $item->price * $item->quantity;
+            });
+            
+            $order->update([
+                'status' => $request->status,
+                'total_price' => $total
+            ]);
+        } else {
+            $order->update([
+                'status' => $request->status
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui');
     }
-} 
+}
