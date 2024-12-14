@@ -139,84 +139,55 @@
                 <!-- Tab Riwayat -->
                 <div id="history" class="tab-content hidden">
                     <div class="space-y-6">
-                        <!-- Pembelian 1 -->
+                        @forelse($orders as $order)
                         <div class="bg-gray-50 rounded-lg p-6">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
                                     <div class="flex items-center gap-3 mb-1">
-                                        <p class="font-semibold text-lg">{{ date('Ymd') }}MS001</p>
-                                        <span class="px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 font-medium">Sudah Sampai</span>
+                                        <p class="font-semibold text-lg">{{ $order->invoice_number }}</p>
+                                        <span class="px-3 py-1 rounded-full text-sm 
+                                            @if($order->status === 'completed') bg-green-100 text-green-800
+                                            @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
+                                            @else bg-red-100 text-red-800 @endif 
+                                            font-medium">
+                                            {{ ucfirst($order->status) }}
+                                        </span>
                                     </div>
-                                    <p class="text-sm text-gray-500">23 Maret 2024 • 14:30 WIB</p>
+                                    <p class="text-sm text-gray-500">{{ $order->created_at->format('d F Y • H:i') }} WIB</p>
                                 </div>
-                                <a href="#" class="flex items-center gap-2 text-primary hover:text-primary-dark font-medium transition-colors">
+                                @if($order->status === 'completed')
+                                <a href="{{ route('user.orders.invoice', $order) }}" 
+                                   class="flex items-center gap-2 text-primary hover:text-primary-dark font-medium transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
                                     </svg>
                                     <span>Download Invoice</span>
                                 </a>
+                                @endif
                             </div>
                             <div class="mt-4 space-y-3 bg-white p-4 rounded-lg">
+                                @foreach($order->orderItems as $item)
                                 <div class="flex justify-between items-center text-sm">
                                     <div class="flex items-center gap-3">
-                                        <img src="https://via.placeholder.com/60x80" alt="Manga Cover" class="w-12 h-16 object-cover rounded shadow">
-                                        <span>One Piece Volume 1</span>
+                                        <img src="{{ $item->manga->cover_url ?? asset('default-cover.jpg') }}" 
+                                             alt="{{ $item->manga->title }}" 
+                                             class="w-12 h-16 object-cover rounded shadow">
+                                        <span>{{ $item->manga->title }} ({{ $item->quantity }}x)</span>
                                     </div>
-                                    <span>Rp {{ number_format(50000, 0, ',', '.') }}</span>
+                                    <span>Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
                                 </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://via.placeholder.com/60x80" alt="Manga Cover" class="w-12 h-16 object-cover rounded shadow">
-                                        <span>Naruto Volume 1</span>
-                                    </div>
-                                    <span>Rp {{ number_format(45000, 0, ',', '.') }}</span>
-                                </div>
+                                @endforeach
                                 <div class="pt-3 border-t flex justify-between items-center">
                                     <span class="font-medium">Total Pembayaran</span>
-                                    <span class="font-bold text-lg">Rp {{ number_format(95000, 0, ',', '.') }}</span>
+                                    <span class="font-bold text-lg">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Pembelian 2 -->
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <div class="flex items-center gap-3 mb-1">
-                                        <p class="font-semibold text-lg">{{ date('Ymd') }}MS002</p>
-                                        <span class="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800 font-medium">Masih Diproses</span>
-                                    </div>
-                                    <p class="text-sm text-gray-500">22 Maret 2024 • 15:45 WIB</p>
-                                </div>
-                                <form action="#" method="POST" onsubmit="return confirmCancel(this)" class="flex items-center">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="flex items-center gap-2 text-red-500 hover:text-red-600 font-medium transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span id="cancelButtonText">Batalkan Pesanan</span>
-                                        <svg id="cancelLoadingIcon" class="hidden animate-spin ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                    </button>
-                                </form>
-                            </div>
-                            <div class="mt-4 space-y-3 bg-white p-4 rounded-lg">
-                                <div class="flex justify-between items-center text-sm">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://via.placeholder.com/60x80" alt="Manga Cover" class="w-12 h-16 object-cover rounded shadow">
-                                        <span>Dragon Ball Volume 1</span>
-                                    </div>
-                                    <span>Rp {{ number_format(48000, 0, ',', '.') }}</span>
-                                </div>
-                                <div class="pt-3 border-t flex justify-between items-center">
-                                    <span class="font-medium">Total Pembayaran</span>
-                                    <span class="font-bold text-lg">Rp {{ number_format(48000, 0, ',', '.') }}</span>
-                                </div>
-                            </div>
+                        @empty
+                        <div class="text-center py-8">
+                            <p class="text-gray-500">Belum ada riwayat pembelian</p>
                         </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
