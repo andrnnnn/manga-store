@@ -62,23 +62,15 @@
 
                     <!-- Category Tags -->
                     <div class="flex flex-wrap gap-2" id="categoryTags">
-                        @php
-                        $categories = [
-                            'all' => 'Semua Genre',
-                            'action' => 'Shōnen',
-                            'romance' => 'Romance',
-                            'comedy' => 'Comedy',
-                            'fantasy' => 'Isekai',
-                            'horror' => 'Horror',
-                            'slice-of-life' => 'Slice of Life'
-                        ];
-                        @endphp
-
-                        @foreach($categories as $value => $label)
-                        <button
-                            data-category="{{ $value }}"
-                            class="category-tag {{ $value === 'all' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700' }} px-4 py-2 rounded-full text-sm font-medium hover:bg-opacity-90 transition-all">
-                            {{ $label }}
+                        <button data-category="all"
+                                class="category-tag bg-primary text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-opacity-90 transition-all">
+                            Semua Genre
+                        </button>
+                        
+                        @foreach($categories as $category)
+                        <button data-category="{{ Str::slug($category->name) }}"
+                                class="category-tag bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-medium hover:bg-opacity-90 transition-all">
+                            {{ $category->name }}
                         </button>
                         @endforeach
                     </div>
@@ -86,96 +78,41 @@
 
                 <!-- Daftar Manga -->
                 <div id="mangaList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Manga Card 1 -->
+                    @forelse($mangas as $manga)
                     <div class="manga-card bg-white rounded-xl shadow overflow-hidden"
-                         data-category="action fantasy"
-                         data-title="One Piece"
-                         data-price="50000"
-                         data-date="2024-03-23">
-                        <img src="https://via.placeholder.com/300x400" alt="Manga Cover" class="w-full h-64 object-cover">
+                         data-category="{{ $manga->categories->pluck('name')->map(function($name) { return Str::slug($name); })->implode(' ') }}"
+                         data-title="{{ $manga->title }}"
+                         data-price="{{ $manga->price }}"
+                         data-date="{{ $manga->created_at }}">
+                        <div class="aspect-[3/4] overflow-hidden">
+                            <img src="{{ $manga->cover_url ?? asset('default-cover.jpg') }}" 
+                                 alt="{{ $manga->title }}" 
+                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                        </div>
                         <div class="p-4">
                             <div class="flex flex-wrap gap-1 mb-2">
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Action</span>
-                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Fantasy</span>
+                                @foreach($manga->categories as $category)
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                    {{ $category->name }}
+                                </span>
+                                @endforeach
                             </div>
-                            <h3 class="text-lg font-semibold mb-2">One Piece</h3>
-                            <p class="text-gray-600 text-sm mb-2">Penulis: Eiichiro Oda</p>
+                            <h3 class="text-lg font-semibold mb-2">{{ $manga->title }}</h3>
+                            <p class="text-gray-600 text-sm mb-2">Penulis: {{ $manga->author }}</p>
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-primary">Rp {{ number_format(50000, 0, ',', '.') }}</span>
-                                <a href="{{ route('user.manga.detail', 1) }}" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-200">
+                                <span class="font-bold text-primary">Rp {{ number_format($manga->price, 0, ',', '.') }}</span>
+                                <a href="{{ route('user.manga.detail', $manga) }}" 
+                                   class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-200">
                                     Detail
                                 </a>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Manga Card 2 -->
-                    <div class="manga-card bg-white rounded-xl shadow overflow-hidden"
-                         data-category="romance comedy"
-                         data-title="Kimi ni Todoke"
-                         data-price="45000"
-                         data-date="2024-03-22">
-                        <img src="https://via.placeholder.com/300x400" alt="Manga Cover" class="w-full h-64 object-cover">
-                        <div class="p-4">
-                            <div class="flex flex-wrap gap-1 mb-2">
-                                <span class="px-2 py-1 bg-pink-100 text-pink-800 rounded-full text-xs">Romance</span>
-                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Comedy</span>
-                            </div>
-                            <h3 class="text-lg font-semibold mb-2">Kimi ni Todoke</h3>
-                            <p class="text-gray-600 text-sm mb-2">Penulis: Karuho Shiina</p>
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-primary">Rp {{ number_format(45000, 0, ',', '.') }}</span>
-                                <a href="{{ route('user.manga.detail', 2) }}" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-200">
-                                    Detail
-                                </a>
-                            </div>
-                        </div>
+                    @empty
+                    <div class="col-span-4 text-center py-8">
+                        <p class="text-gray-500">Tidak ada manga yang tersedia saat ini</p>
                     </div>
-
-                    <!-- Manga Card 3 -->
-                    <div class="manga-card bg-white rounded-xl shadow overflow-hidden"
-                         data-category="slice-of-life comedy"
-                         data-title="Yotsuba"
-                         data-price="40000"
-                         data-date="2024-03-21">
-                        <img src="https://via.placeholder.com/300x400" alt="Manga Cover" class="w-full h-64 object-cover">
-                        <div class="p-4">
-                            <div class="flex flex-wrap gap-1 mb-2">
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Slice of Life</span>
-                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Comedy</span>
-                            </div>
-                            <h3 class="text-lg font-semibold mb-2">Yotsuba&!</h3>
-                            <p class="text-gray-600 text-sm mb-2">Penulis: Kiyohiko Azuma</p>
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-primary">Rp {{ number_format(40000, 0, ',', '.') }}</span>
-                                <a href="{{ route('user.manga.detail', 3) }}" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-200">
-                                    Detail
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Manga Card 4 -->
-                    <div class="manga-card bg-white rounded-xl shadow overflow-hidden"
-                         data-category="horror"
-                         data-title="Junji Ito Collection"
-                         data-price="55000"
-                         data-date="2024-03-20">
-                        <img src="https://via.placeholder.com/300x400" alt="Manga Cover" class="w-full h-64 object-cover">
-                        <div class="p-4">
-                            <div class="flex flex-wrap gap-1 mb-2">
-                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Horror</span>
-                            </div>
-                            <h3 class="text-lg font-semibold mb-2">Junji Ito Collection</h3>
-                            <p class="text-gray-600 text-sm mb-2">Penulis: Junji Ito</p>
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-primary">Rp {{ number_format(55000, 0, ',', '.') }}</span>
-                                <a href="{{ route('user.manga.detail', 4) }}" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-200">
-                                    Detail
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    @endforelse
                 </div>
 
                 <!-- No Results Message -->
@@ -256,11 +193,17 @@ document.addEventListener('DOMContentLoaded', function() {
         mangaCards.forEach(card => {
             const title = card.querySelector('h3').textContent.toLowerCase();
             const author = card.querySelector('p').textContent.toLowerCase();
-            const categories = card.dataset.category.split(' ');
+            const cardCategories = card.dataset.category.split(' ');
 
-            const matchesSearch = title.includes(searchTerm) || author.includes(searchTerm);
-            const matchesCategory = activeCategories.has('all') ||
-                                  categories.some(cat => activeCategories.has(cat));
+            const matchesSearch = title.includes(searchTerm) || 
+                                author.includes(searchTerm);
+                            
+            // Menggunakan AND untuk kategori
+            // Manga harus memiliki SEMUA kategori yang aktif
+            const matchesCategory = activeCategories.has('all') || 
+                                  [...activeCategories].every(activeCategory => 
+                                      cardCategories.includes(activeCategory)
+                                  );
 
             if (matchesSearch && matchesCategory) {
                 card.classList.remove('hidden');

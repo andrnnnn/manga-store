@@ -21,23 +21,34 @@
                     <!-- Gambar Manga -->
                     <div class="md:w-1/3">
                         <div class="sticky top-20">
-                            <img src="https://via.placeholder.com/500x700" alt="Cover Manga" class="w-full h-auto object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                            <div class="aspect-[3/4] rounded-lg overflow-hidden shadow-lg">
+                                <img src="{{ $manga->cover_url ?? asset('default-cover.jpg') }}" 
+                                     alt="{{ $manga->title }}" 
+                                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                            </div>
                             <div class="mt-4 space-y-4">
                                 <div class="bg-gray-50 p-4 rounded-lg space-y-4">
                                     <div>
                                         <p class="text-sm text-gray-600">Harga</p>
-                                        <p class="text-2xl font-bold text-primary">Rp 50.000</p>
+                                        <p class="text-2xl font-bold text-primary">Rp {{ number_format($manga->price, 0, ',', '.') }}</p>
                                     </div>
-                                    <button class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium">
-                                        Tambah ke Keranjang
-                                    </button>
+                                    <!-- Form Tambah ke Keranjang -->
+                                    <form action="{{ route('user.cart.add', $manga) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium">
+                                            Tambah ke Keranjang
+                                        </button>
+                                    </form>
                                 </div>
                                 <div class="bg-gray-50 p-4 rounded-lg">
                                     <h3 class="font-semibold mb-2">Info Tambahan</h3>
                                     <div class="space-y-2 text-sm text-gray-600">
-                                        <p>Status: <span class="text-green-600 font-medium">Tersedia</span></p>
-                                        <p>Stok: 50 buah</p>
-                                        <p>Ditambahkan: 23 Maret 2024</p>
+                                        <p>Status: <span class="text-{{ $manga->stock > 0 ? 'green' : 'red' }}-600 font-medium">
+                                            {{ $manga->stock > 0 ? 'Tersedia' : 'Stok Habis' }}
+                                        </span></p>
+                                        <p>Stok: {{ $manga->stock }} buah</p>
+                                        <p>Ditambahkan: {{ $manga->created_at->format('d F Y') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -47,11 +58,13 @@
                     <!-- Informasi Manga -->
                     <div class="md:w-2/3 mt-6 md:mt-0">
                         <div class="prose max-w-none">
-                            <h1 class="text-3xl font-bold mb-2">One Piece Volume 1</h1>
+                            <h1 class="text-3xl font-bold mb-2">{{ $manga->title }}</h1>
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">Shōnen</span>
-                                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">Action</span>
-                                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">Adventure</span>
+                                @foreach($manga->categories as $category)
+                                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    {{ $category->name }}
+                                </span>
+                                @endforeach
                             </div>
                             
                             <div class="space-y-6">
@@ -61,24 +74,26 @@
                                         <div class="space-y-2">
                                             <div>
                                                 <p class="text-gray-600">Penulis</p>
-                                                <p class="font-medium">Eiichiro Oda</p>
+                                                <p class="font-medium">{{ $manga->author }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-gray-600">Kategori</p>
-                                                <p class="font-medium">Shōnen, Action, Adventure</p>
+                                                <p class="font-medium">{{ $manga->categories->pluck('name')->implode(', ') }}</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                @if($manga->description)
                                 <div>
-                                    <h2 class="text-xl font-semibold mb-2">Sinopsis</h2>
+                                    <h2 class="text-xl font-semibold mb-2">Deskripsi</h2>
                                     <div class="bg-gray-50 p-4 rounded-lg">
                                         <p class="text-gray-600 leading-relaxed">
-                                            Gol D. Roger dikenal sebagai Raja Bajak Laut, yang terkuat dan paling terkenal yang pernah mengarungi Grand Line. Penangkapan dan eksekusi Roger oleh Pemerintah Dunia membawa perubahan di seluruh dunia. Kata-kata terakhirnya sebelum kematiannya mengungkapkan keberadaan harta karun terbesar di dunia, One Piece. Inilah awal dari era bajak laut, semua orang bermimpi menemukan One Piece (yang menjanjikan kekayaan dan ketenaran tak terbatas) dan sangat mungkin menjadi Raja Bajak Laut berikutnya.
+                                            {{ $manga->description }}
                                         </p>
                                     </div>
                                 </div>
+                                @endif
                             </div>
                         </div>
                     </div>
