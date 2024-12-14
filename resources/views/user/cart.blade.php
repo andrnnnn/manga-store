@@ -49,13 +49,9 @@
                                 <input type="checkbox" id="select-all" class="rounded border-gray-300 text-primary focus:ring-primary cursor-pointer">
                                 <span class="text-sm font-medium text-gray-700">Pilih Semua Manga</span>
                             </label>
-                            <form id="removeSelectedForm" action="{{ route('user.cart.remove-selected') }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" onclick="removeSelected()" class="text-sm text-red-500 hover:text-red-600 font-medium transition-colors">
-                                    Hapus yang Dipilih
-                                </button>
-                            </form>
+                            <button type="button" onclick="showDeleteSelectedModal()" class="text-sm text-red-500 hover:text-red-600 font-medium transition-colors">
+                                Hapus yang Dipilih
+                            </button>
                         </div>
 
                         <!-- Daftar Item -->
@@ -102,7 +98,6 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                                onclick="return confirm('Yakin ingin menghapus manga ini dari keranjang?')"
                                                 class="text-gray-400 hover:text-red-500 transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -248,6 +243,36 @@
                                 class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium flex items-center">
                             <span id="checkoutButtonText">Konfirmasi Pembelian</span>
                             <svg id="checkoutLoadingIcon" class="hidden animate-spin ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tambahkan modal konfirmasi hapus setelah checkout modal -->
+<div id="deleteSelectedModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
+                <p class="text-gray-600 mb-6">Yakin ingin menghapus manga yang dipilih dari keranjang?</p>
+                <div class="flex justify-end gap-4">
+                    <button onclick="hideDeleteSelectedModal()" 
+                            class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                        Batal
+                    </button>
+                    <form id="removeSelectedForm" action="{{ route('user.cart.remove-selected') }}" method="POST" class="inline" onsubmit="startDeleteLoading(this)">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center">
+                            <span id="deleteButtonText">Hapus Sekarang</span>
+                            <svg id="deleteLoadingIcon" class="hidden animate-spin ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -550,6 +575,62 @@ document.getElementById('checkoutModal').addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !document.getElementById('checkoutModal').classList.contains('hidden')) {
         hideCheckoutModal();
+    }
+});
+
+// Fungsi untuk menampilkan modal konfirmasi hapus yang dipilih
+function showDeleteSelectedModal() {
+    const selectedItems = document.querySelectorAll('.cart-item-checkbox:checked');
+    
+    if (selectedItems.length === 0) {
+        alert('Pilih manga yang ingin dihapus');
+        return;
+    }
+    
+    document.getElementById('deleteSelectedModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Fungsi untuk menyembunyikan modal konfirmasi hapus
+function hideDeleteSelectedModal() {
+    document.getElementById('deleteSelectedModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Fungsi untuk memulai loading state saat menghapus
+function startDeleteLoading(form) {
+    const selectedItems = Array.from(document.querySelectorAll('.cart-item-checkbox:checked'))
+        .map(checkbox => checkbox.value);
+
+    // Buat input tersembunyi untuk setiap item yang dipilih
+    selectedItems.forEach(value => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `items[]`;
+        input.value = value;
+        form.appendChild(input);
+    });
+
+    const button = form.querySelector('button[type="submit"]');
+    const buttonText = button.querySelector('#deleteButtonText');
+    const loadingIcon = button.querySelector('#deleteLoadingIcon');
+
+    button.disabled = true;
+    buttonText.textContent = 'Menghapus...';
+    loadingIcon.classList.remove('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('deleteSelectedModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideDeleteSelectedModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('deleteSelectedModal').classList.contains('hidden')) {
+        hideDeleteSelectedModal();
     }
 });
 </script>
