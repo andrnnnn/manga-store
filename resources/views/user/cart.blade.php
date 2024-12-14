@@ -153,17 +153,12 @@
                                 </div>
                                 <div class="flex items-center gap-3">
                                     @if($order->status === 'pending')
-                                    <form action="{{ route('user.orders.cancel', $order) }}" method="POST" class="inline" onsubmit="return confirmCancel(this)">
-                                        @csrf
-                                        @method('PUT')
-                                        <button type="submit" class="flex items-center gap-2 text-red-500 hover:text-red-600 font-medium transition-colors">
-                                            <span id="cancelButtonText">Batalkan Pesanan</span>
-                                            <svg id="cancelLoadingIcon" class="hidden animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            onclick="showCancelOrderModal({{ $order->id }})" 
+                                            data-cancel-url="{{ route('user.orders.cancel', $order) }}"
+                                            class="flex items-center gap-2 text-red-500 hover:text-red-600 font-medium transition-colors">
+                                        Batalkan Pesanan
+                                    </button>
                                     @endif
                                     @if($order->status === 'completed')
                                     <a href="{{ route('user.orders.invoice', $order) }}" 
@@ -273,6 +268,36 @@
                                 class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center">
                             <span id="deleteButtonText">Hapus Sekarang</span>
                             <svg id="deleteLoadingIcon" class="hidden animate-spin ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tambahkan modal ini sebelum tag penutup </body> atau setelah modal lainnya -->
+<div id="cancelOrderModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Konfirmasi Pembatalan</h3>
+                <p class="text-gray-600 mb-6">Apakah kamu yakin ingin membatalkan pesanan ini?</p>
+                <div class="flex justify-end gap-4">
+                    <button onclick="hideCancelOrderModal()" 
+                            class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                        Tidak Jadi
+                    </button>
+                    <form id="cancelOrderForm" method="POST" class="inline" onsubmit="startCancelLoading(this)">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" 
+                                class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center">
+                            <span id="cancelOrderButtonText">Ya, Batalkan</span>
+                            <svg id="cancelOrderLoadingIcon" class="hidden animate-spin ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -631,6 +656,50 @@ document.getElementById('deleteSelectedModal').addEventListener('click', functio
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !document.getElementById('deleteSelectedModal').classList.contains('hidden')) {
         hideDeleteSelectedModal();
+    }
+});
+
+// Fungsi untuk menampilkan modal pembatalan pesanan
+function showCancelOrderModal(orderId) {
+    const modal = document.getElementById('cancelOrderModal');
+    const form = document.getElementById('cancelOrderForm');
+    const button = event.target;
+    
+    form.action = button.dataset.cancelUrl;
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Fungsi untuk menyembunyikan modal pembatalan
+function hideCancelOrderModal() {
+    const modal = document.getElementById('cancelOrderModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Fungsi untuk memulai loading state saat membatalkan pesanan
+function startCancelLoading(form) {
+    const button = form.querySelector('button[type="submit"]');
+    const buttonText = button.querySelector('#cancelOrderButtonText');
+    const loadingIcon = button.querySelector('#cancelOrderLoadingIcon');
+
+    button.disabled = true;
+    buttonText.textContent = 'Membatalkan...';
+    loadingIcon.classList.remove('hidden');
+}
+
+// Event listener untuk menutup modal saat mengklik di luar modal
+document.getElementById('cancelOrderModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideCancelOrderModal();
+    }
+});
+
+// Event listener untuk menutup modal dengan tombol Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('cancelOrderModal').classList.contains('hidden')) {
+        hideCancelOrderModal();
     }
 });
 </script>
