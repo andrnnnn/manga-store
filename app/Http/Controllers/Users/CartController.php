@@ -15,15 +15,24 @@ class CartController extends Controller
 {
     public function index()
     {
-        $cartItems = CartItem::with('manga')
-            ->where('user_id', Auth::id())
-            ->get();
+        $cartItems = CartItem::with(['manga' => function($query) {
+            $query->whereNull('deleted_at');
+        }])
+        ->where('user_id', Auth::id())
+        ->whereNull('deleted_at')
+        ->get();
 
         $total = $cartItems->sum(function($item) {
             return $item->manga->price * $item->quantity;
         });
 
-        return view('user.cart.index', compact('cartItems', 'total'));
+        $orders = Order::with(['orderItems.manga'])
+            ->where('user_id', Auth::id())
+            ->whereNull('deleted_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('user.cart', compact('cartItems', 'total', 'orders'));
     }
 
     public function add(Request $request, Manga $manga)
@@ -55,14 +64,19 @@ class CartController extends Controller
         return back()->with('success', 'Manga berhasil ditambahkan ke keranjang!');
     }
 
-    public function update(Request $request, CartItem $cartItem)
+    public function updateQuantity(Request $request, CartItem $cartItem)
     {
         if ($cartItem->user_id !== Auth::id()) {
             abort(403);
         }
 
         $request->validate([
-            'quantity' => 'required|integer|min:1|max:' . $cartItem->manga->stock
+            'quantity' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:' . $cartItem->manga->stock
+            ]
         ]);
 
         $cartItem->update(['quantity' => $request->quantity]);
@@ -76,34 +90,65 @@ class CartController extends Controller
         }
 
         $cartItem->delete();
-        return back()->with('success', 'Item berhasil dihapus dari keranjang!');
+        return back()->with('success', 'Manga berhasil dihapus dari keranjang!');
     }
 
-    public function checkout()
+    public function removeSelected(Request $request)
     {
-        $cartItems = CartItem::with('manga')
-            ->where('user_id', Auth::id())
-            ->get();
-
-        if ($cartItems->isEmpty()) {
-            return back()->with('error', 'Keranjang kosong!');
+        if (!$request->has('items') || !is_array($request->items)) {
+            return back()->with('error', 'Pilih manga yang ingin dihapus');
         }
 
-        // Cek stok
-        foreach ($cartItems as $item) {
-            if ($item->quantity > $item->manga->stock) {
-                return back()->with('error', "Stok {$item->manga->title} tidak mencukupi!");
-            }
+        CartItem::whereIn('cart_item_id', $request->items)
+            ->where('user_id', Auth::id())
+            ->delete();
+
+        return back()->with('success', 'Manga berhasil dihapus dari keranjang!');
+    }
+
+    private function calculateTotal()
+    {
+        return CartItem::with('manga')
+            ->where('user_id', Auth::id())
+            ->whereNull('deleted_at')
+            ->get()
+            ->sum(function($item) {
+                return $item->manga->price * $item->quantity;
+            });
+    }
+
+    public function checkout(Request $request)
+    {
+        $selectedItems = json_decode($request->selected_items, true);
+
+        if (empty($selectedItems)) {
+            return back()->with('error', 'Pilih manga yang ingin dibeli');
         }
 
         try {
             DB::beginTransaction();
 
-            // Buat order baru
-            $total = $cartItems->sum(function($item) {
-                return $item->manga->price * $item->quantity;
+            // Ambil cart items yang dipilih
+            $cartItems = CartItem::with('manga')
+                ->whereIn('cart_item_id', array_column($selectedItems, 'id'))
+                ->where('user_id', Auth::id())
+                ->get();
+
+            // Validasi stok
+            foreach ($cartItems as $item) {
+                $selectedItem = collect($selectedItems)->firstWhere('id', $item->cart_item_id);
+                if ($selectedItem['quantity'] > $item->manga->stock) {
+                    throw new \Exception("Stok {$item->manga->title} tidak mencukupi!");
+                }
+            }
+
+            // Hitung total
+            $total = $cartItems->sum(function($item) use ($selectedItems) {
+                $selectedItem = collect($selectedItems)->firstWhere('id', $item->cart_item_id);
+                return $item->manga->price * $selectedItem['quantity'];
             });
 
+            // Buat order
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'total_price' => $total,
@@ -111,28 +156,30 @@ class CartController extends Controller
                 'invoice_number' => 'INV-' . time() . '-' . Auth::id()
             ]);
 
-            // Buat order items
+            // Buat order items dan update stok
             foreach ($cartItems as $item) {
+                $selectedItem = collect($selectedItems)->firstWhere('id', $item->cart_item_id);
+
                 OrderItem::create([
                     'order_id' => $order->order_id,
                     'manga_id' => $item->manga_id,
-                    'quantity' => $item->quantity,
+                    'quantity' => $selectedItem['quantity'],
                     'price' => $item->manga->price
                 ]);
 
-                // Update stok manga
-                $item->manga->decrement('stock', $item->quantity);
-            }
+                // Update stok
+                $item->manga->decrement('stock', $selectedItem['quantity']);
 
-            // Kosongkan keranjang
-            CartItem::where('user_id', Auth::id())->delete();
+                // Hapus item dari cart
+                $item->delete();
+            }
 
             DB::commit();
             return redirect()->route('user.dashboard')->with('success', 'Pesanan berhasil dibuat!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan saat checkout!');
+            return back()->with('error', $e->getMessage());
         }
     }
-} 
+}
