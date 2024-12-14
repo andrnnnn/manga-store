@@ -22,17 +22,13 @@ class CartController extends Controller
         ->whereNull('deleted_at')
         ->get();
 
-        $total = $cartItems->sum(function($item) {
-            return $item->manga->price * $item->quantity;
-        });
-
         $orders = Order::with(['orderItems.manga'])
             ->where('user_id', Auth::id())
             ->whereNull('deleted_at')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('user.cart', compact('cartItems', 'total', 'orders'));
+        return view('user.cart', compact('cartItems', 'orders'));
     }
 
     public function add(Request $request, Manga $manga)
