@@ -24,5 +24,6 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(f
     // Order Routes
     Route::controller(OrderController::class)->group(function () {
         Route::get('/orders/{order}/invoice', 'showInvoice')->name('orders.invoice');
+        Route::put('/orders/{order}/cancel', 'cancelOrder')->name('orders.cancel');
     });
 });

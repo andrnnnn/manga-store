@@ -148,22 +148,38 @@
                                         <span class="px-3 py-1 rounded-full text-sm 
                                             @if($order->status === 'completed') bg-green-100 text-green-800
                                             @elseif($order->status === 'pending') bg-yellow-100 text-yellow-800
-                                            @else bg-red-100 text-red-800 @endif 
+                                            @elseif($order->status === 'cancelled') bg-red-100 text-red-800
+                                            @endif 
                                             font-medium">
                                             {{ ucfirst($order->status) }}
                                         </span>
                                     </div>
                                     <p class="text-sm text-gray-500">{{ $order->created_at->format('d F Y • H:i') }} WIB</p>
                                 </div>
-                                @if($order->status === 'completed')
-                                <a href="{{ route('user.orders.invoice', $order) }}" 
-                                   class="flex items-center gap-2 text-primary hover:text-primary-dark font-medium transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span>Download Invoice</span>
-                                </a>
-                                @endif
+                                <div class="flex items-center gap-3">
+                                    @if($order->status === 'pending')
+                                    <form action="{{ route('user.orders.cancel', $order) }}" method="POST" class="inline" onsubmit="return confirmCancel(this)">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="flex items-center gap-2 text-red-500 hover:text-red-600 font-medium transition-colors">
+                                            <span id="cancelButtonText">Batalkan Pesanan</span>
+                                            <svg id="cancelLoadingIcon" class="hidden animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    @endif
+                                    @if($order->status === 'completed')
+                                    <a href="{{ route('user.orders.invoice', $order) }}" 
+                                       class="flex items-center gap-2 text-primary hover:text-primary-dark font-medium transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span>Download Invoice</span>
+                                    </a>
+                                    @endif
+                                </div>
                             </div>
                             <div class="mt-4 space-y-3 bg-white p-4 rounded-lg">
                                 @foreach($order->orderItems as $item)
