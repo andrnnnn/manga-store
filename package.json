@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "vercel-build": "npm run build && php artisan config:cache"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
