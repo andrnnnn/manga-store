@@ -30,7 +30,7 @@
     <div class="fixed left-0 top-0 w-64 h-full bg-gray-800 p-4">
         <div class="flex items-center gap-3 mb-8">
             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8">
-            <span class="font-semibold text-lg">Manga Store</span>
+            <span class="font-semibold text-lg">MangaStore</span>
         </div>
 
         <nav class="space-y-2">
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-gray-800 p-6 rounded-xl">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -113,12 +113,30 @@
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <p class="text-gray-400 text-sm">Total Pendapatan</p>
-                        <h3 class="text-2xl font-bold">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
+                        <h3 class="text-2xl font-bold flex items-center">
+                            <span class="text-lg mr-1">Rp</span>
+                            <span>{{ number_format($totalRevenue, 0, ',', '.') }}</span>
+                        </h3>
                     </div>
                     <div class="p-2 bg-primary/20 text-primary rounded-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Pesanan</p>
+                        <h3 class="text-2xl font-bold">{{ $pendingOrders }}</h3>
+                    </div>
+                    <div class="p-2 bg-yellow-400/20 text-yellow-400 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                 </div>
