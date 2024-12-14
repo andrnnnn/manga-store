@@ -17,6 +17,7 @@ CREATE TABLE mangas (
     title VARCHAR(255) NOT NULL,
     author VARCHAR(255),
     price DECIMAL(10, 2) NOT NULL,
+    description TEXT,
     stock INT DEFAULT 0,
     cover_url VARCHAR(255),
     category_id INT,
@@ -55,7 +56,8 @@ CREATE TABLE orders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    invoice_number VARCHAR(50) UNIQUE NULL
 );
 
 -- Tabel untuk menyimpan detail pesanan dengan soft delete
@@ -69,5 +71,18 @@ CREATE TABLE order_items (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (manga_id) REFERENCES mangas(manga_id)
+);
+
+-- Tabel untuk menyimpan item di keranjang belanja dengan soft delete
+CREATE TABLE cart_items (
+    cart_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    manga_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (manga_id) REFERENCES mangas(manga_id)
 );
