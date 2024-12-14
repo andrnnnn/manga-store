@@ -1,7 +1,7 @@
 <div class="fixed left-0 top-0 w-64 h-full bg-gray-800 p-4">
     <div class="flex items-center gap-3 mb-8">
-        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8">
-        <span class="font-semibold text-lg">Manga Store</span>
+        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16 w-16">
+        <span class="font-semibold text-lg">{{ config('app.name') }}</span>
     </div>
 
     <nav class="space-y-2">

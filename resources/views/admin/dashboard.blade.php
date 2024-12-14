@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Dashboard Admin - {{ config('app.name') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -29,8 +29,8 @@
     <!-- Sidebar -->
     <div class="fixed left-0 top-0 w-64 h-full bg-gray-800 p-4">
         <div class="flex items-center gap-3 mb-8">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8">
-            <span class="font-semibold text-lg">MangaStore</span>
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16 w-16">
+            <span class="font-semibold text-lg">{{ config('app.name') }}</span>
         </div>
 
         <nav class="space-y-2">

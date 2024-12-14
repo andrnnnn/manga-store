@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name') }} - @yield('title')</title>
+    <title>@yield('title')</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -39,12 +39,6 @@
     @endif
 
     <div class="max-w-md w-full mx-2">
-        <!-- Logo -->
-        <div class="text-center mb-8">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-40 mx-auto">
-            <p class="text-primary-dark font-medium">Manga Store Indonesia</p>
-        </div>
-
         @yield('content')
     </div>
 

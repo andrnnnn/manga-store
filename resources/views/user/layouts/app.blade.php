@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - MangaStore</title>
+    <title>@yield('title') - {{ config('app.name') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
@@ -16,8 +16,8 @@
                 <!-- Logo & Brand -->
                 <div class="flex items-center gap-2">
                     <a href="{{ route('user.dashboard') }}" class="flex items-center gap-2">
-                        <img src="{{ asset('images/logo.png') }}" alt="MangaStore Logo" class="h-8 w-auto">
-                        <span class="text-xl font-bold text-primary hover:text-primary-dark transition-colors">MangaStore</span>
+                        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" class="h-16 w-16">
+                        <span class="text-xl font-bold text-primary hover:text-primary-dark transition-colors">{{ config('app.name') }}</span>
                     </a>
                 </div>
 

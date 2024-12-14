@@ -1,6 +1,6 @@
 @extends('auth.index')
 
-@section('title', 'Login')
+@section('title', 'Login - ' . config('app.name'))
 
 @section('content')
 <div class="bg-surface-light rounded-xl shadow-lg p-8">

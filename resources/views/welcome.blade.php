@@ -131,8 +131,8 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo & Brand -->
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-16 h-16 sm:w-20 sm:h-20">
-                    <span class="font-semibold text-base sm:text-lg text-primary-dark hover:text-primary transition-colors">MangaStore</span>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16 w-16">
+                    <span class="font-semibold text-base sm:text-lg text-primary-dark hover:text-primary transition-colors">{{ config('app.name') }}</span>
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -232,7 +232,7 @@
             <div class="text-center mt-8">
                 <a href="{{ route('login') }}"
                     class="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors">
-                    <i class="fas fa-sign-in-alt"></i> Masuk untuk melihat lebih banyak
+                    Masuk untuk melihat lebih banyak
                 </a>
             </div>
         </div>
